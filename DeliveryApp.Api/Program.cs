@@ -1,4 +1,5 @@
 using DeliveryApp.Api;
+using DeliveryApp.Core.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,15 +9,19 @@ builder.Services.AddHealthChecks();
 // Cors
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy.AllowAnyOrigin(); // Не делайте так в проде!
-        });
+	options.AddDefaultPolicy(
+		policy =>
+		{
+			policy.AllowAnyOrigin(); // Не делайте так в проде!
+		});
 });
 
 // Configuration
 builder.Services.ConfigureOptions<SettingsSetup>();
+
+// Domain Services
+builder.Services.AddScoped<IDispatchService, DispatchService>();
+
 var connectionString = builder.Configuration["CONNECTION_STRING"];
 
 var app = builder.Build();
@@ -24,9 +29,9 @@ var app = builder.Build();
 // -----------------------------------
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
-    app.UseDeveloperExceptionPage();
+	app.UseDeveloperExceptionPage();
 else
-    app.UseHsts();
+	app.UseHsts();
 
 app.UseHealthChecks("/health");
 app.UseRouting();
