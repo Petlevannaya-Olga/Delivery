@@ -2,16 +2,11 @@
 
 namespace DeliveryApp.Infrastructure.Adapters.Postgres
 {
-	public class UnitOfWork : IUnitOfWork, IDisposable
+	public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork, IDisposable
 	{
-		private readonly ApplicationDbContext _dbContext;
+		private readonly ApplicationDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
 		private bool _disposed;
-
-		public UnitOfWork(ApplicationDbContext dbContext)
-		{
-			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-		}
 
 		public void Dispose()
 		{
