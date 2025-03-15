@@ -8,26 +8,26 @@ namespace DeliveryApp.Core.Ports;
 /// </summary>
 public interface ICourierRepository
 {
-    /// <summary>
-    /// Добавить курьера
-    /// </summary>
-    /// <param name="courier">Курьер</param>
-    Task Add(Courier courier);
+	/// <summary>
+	/// Добавить курьера
+	/// </summary>
+	/// <param name="courier">Курьер</param>
+	Task Add(Courier courier);
 
-    /// <summary>
-    /// Обновить курьера
-    /// </summary>
-    /// <param name="courier">Курьер</param>
-    void Update(Courier courier);
+	/// <summary>
+	/// Обновить курьера
+	/// </summary>
+	/// <param name="courier">Курьер</param>
+	void Update(Courier courier);
 
-    /// <summary>
-    /// Получить курьера по идентификатору
-    /// </summary>
-    /// <param name="courierId">Идентификатор</param>
-    Task<Maybe<Courier>> GetAsync(Guid courierId);
+	/// <summary>
+	/// Получить курьера по идентификатору
+	/// </summary>
+	/// <param name="courierId">Идентификатор</param>
+	Task<Maybe<Courier>> Get(Guid courierId);
 
-    /// <summary>
-    /// Получить всех свободных курьеров
-    /// </summary>
-    IEnumerable<Courier> GetAllFree();
+	/// <summary>
+	/// Получить всех свободных курьеров
+	/// </summary>
+	IEnumerable<Courier> GetAllFree();
 }
