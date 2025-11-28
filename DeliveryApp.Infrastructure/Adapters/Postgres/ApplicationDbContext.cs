@@ -19,5 +19,4 @@ namespace DeliveryApp.Infrastructure.Adapters.Postgres
 			modelBuilder.ApplyConfiguration(new TransportEntityTypeConfiguration());
 		}
 	}
-
 }

@@ -29,5 +29,5 @@ public interface ICourierRepository
 	/// <summary>
 	/// Получить всех свободных курьеров
 	/// </summary>
-	IEnumerable<Courier> GetAllFree();
+	List<Courier> GetAllFree();
 }

@@ -14,12 +14,12 @@ public class CourierRepository(ApplicationDbContext dbContext) : ICourierReposit
 		await _dbContext.Couriers.AddAsync(courier);
 	}
 
-	public IEnumerable<Courier> GetAllFree()
+	public List<Courier> GetAllFree()
 	{
 		var couriers = _dbContext
 			.Couriers
 			.Include(x => x.Transport)
-			.Where(o => o.Status.Name == CourierStatus.Free.Name);
+			.Where(o => o.Status.Name == CourierStatus.Free.Name).ToList();
 		return couriers;
 	}
 
