@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using MediatR;
 using Primitives;
 
-namespace DeliveryApp.Core.Application.Commands;
+namespace DeliveryApp.Core.Application.Commands.CreateOrder;
 
 public class CreateOrderCommand : IRequest<UnitResult<Error>>
 {
