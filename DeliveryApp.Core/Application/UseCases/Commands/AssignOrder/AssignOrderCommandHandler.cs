@@ -30,7 +30,7 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
         // Получить первый заказ в статусе Created
         var getOrderResult = await _orderRepository.GetFirstInCreatedStatus();
 
-        // Если такого заказа нет - ничего не делаем
+        // Если такого заказа нет - возвращаем ошибку
         if (getOrderResult.HasNoValue)
         {
             return Errors.AvailableOrdersWereNotFound();
@@ -71,11 +71,11 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
     /// Ошибки, которые может возвращать сущность
     /// </summary>
     [ExcludeFromCodeCoverage]
-    private static class Errors
+    public static class Errors
     {
         public static Error FreeCouriersWereNotFound()
         {
-            return new Error("free.couriers.was.not.found",
+            return new Error("free.couriers.were.not.found",
                 "Свободные курьеры не найдены");
         }
 
