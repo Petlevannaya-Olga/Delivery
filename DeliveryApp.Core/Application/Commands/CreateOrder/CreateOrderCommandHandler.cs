@@ -50,11 +50,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Uni
     /// Ошибки, которые может возвращать сущность
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public static class Errors
+    private static class Errors
     {
         public static Error LocationIsInvalid()
         {
-            return new Error($"location.is.invalid",
+            return new Error("location.is.invalid",
                 $"Ошибка при получении координат заказа");
         }
     }
