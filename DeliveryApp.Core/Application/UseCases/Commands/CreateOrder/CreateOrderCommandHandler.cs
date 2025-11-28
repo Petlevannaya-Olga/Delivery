@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DeliveryApp.Core.Domain.Model.OrderAggregate;
+using DeliveryApp.Core.Domain.Model.SharedKernel;
 using DeliveryApp.Core.Ports;
 using MediatR;
 using Primitives;
@@ -10,17 +10,15 @@ namespace DeliveryApp.Core.Application.UseCases.Commands.CreateOrder;
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, UnitResult<Error>>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IGeoClient _geoClient;
     private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
-    ///     Ctr
+    /// Конструктор
     /// </summary>
-    public CreateOrderCommandHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository, IGeoClient geoClient)
+    public CreateOrderCommandHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-        _geoClient = geoClient;
     }
 
     public async Task<UnitResult<Error>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -31,31 +29,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Uni
             return UnitResult.Success<Error>();
 
         // Получаем координаты
-        var location = await _geoClient.GetLocation(request.Street, cancellationToken);
-        if (location.IsFailure)
-            return Errors.LocationIsInvalid();
+        var location = Location.CreateRandom();
 
         // Создаем заказ
-        var createOrderResult = Order.Create(request.OrderId, location.Value);
+        var createOrderResult = Order.Create(request.OrderId, location);
         if (createOrderResult.IsFailure)
-            return createOrderResult.Error;
+            return createOrderResult;
 
         // Сохраняем заказ
         await _orderRepository.Add(createOrderResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return UnitResult.Success<Error>();
-    }
-
-    /// <summary>
-    /// Ошибки, которые может возвращать сущность
-    /// </summary>
-    [ExcludeFromCodeCoverage]
-    private static class Errors
-    {
-        public static Error LocationIsInvalid()
-        {
-            return new Error("location.is.invalid",
-                $"Ошибка при получении координат заказа");
-        }
     }
 }

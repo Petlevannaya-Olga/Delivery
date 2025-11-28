@@ -28,6 +28,10 @@ public class CreateOrderCommand : IRequest<UnitResult<Error>>
     /// </summary>
     public CreateOrderCommand(Guid orderId, string street, int volume)
     {
+        if(orderId == Guid.Empty) throw new ArgumentNullException(nameof(orderId));
+        if(string.IsNullOrWhiteSpace(street)) throw new ArgumentNullException(nameof(street));
+        if(volume < 0) throw new ArgumentOutOfRangeException(nameof(volume));
+        
         OrderId = orderId;
         Street = street;
         Volume = volume;

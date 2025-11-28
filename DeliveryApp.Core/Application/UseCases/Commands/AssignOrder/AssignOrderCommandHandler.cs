@@ -28,12 +28,12 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
     public async Task<UnitResult<Error>> Handle(AssignOrderCommand request, CancellationToken cancellationToken)
     {
         // Получить первый заказ в статусе Created
-        var order = await _orderRepository.GetFirstInCreatedStatus();
+        var getOrderResult = await _orderRepository.GetFirstInCreatedStatus();
 
         // Если такого заказа нет - ничего не делаем
-        if (order.HasNoValue)
+        if (getOrderResult.HasNoValue)
         {
-            return UnitResult.Success<Error>();
+            return Errors.AvailableOrdersWereNotFound();
         }
 
         // Получаем всех свободных курьеров
@@ -45,7 +45,7 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
         }
 
         // Выбираем подходящего курьера
-        var dispatchResult = _dispatchService.Dispatch(order.Value, couriers);
+        var dispatchResult = _dispatchService.Dispatch(getOrderResult.Value, couriers);
 
         if (dispatchResult.IsFailure)
         {
@@ -56,7 +56,7 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
         try
         {
             _courierRepository.Update(dispatchResult.Value);
-            _orderRepository.Update(order.Value);
+            _orderRepository.Update(getOrderResult.Value);
             await _unitOfWork.CommitAsync(cancellationToken);
         }
         catch
@@ -73,16 +73,16 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
     [ExcludeFromCodeCoverage]
     private static class Errors
     {
-        public static Error OrderWithIdWasNotFound(string orderId)
-        {
-            return new Error($"order.with.id.{orderId}.was.not.found",
-                $"Заказ с id = {orderId} не найден");
-        }
-
         public static Error FreeCouriersWereNotFound()
         {
-            return new Error($"free.couriers.was.not.found",
+            return new Error("free.couriers.was.not.found",
                 "Свободные курьеры не найдены");
+        }
+
+        public static Error AvailableOrdersWereNotFound()
+        {
+            return new Error("available.orders.were.not.found", 
+                "Нет доступных заказов");
         }
     }
 }

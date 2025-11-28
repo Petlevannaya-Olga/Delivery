@@ -51,9 +51,9 @@ public class MoveCouriersCommandHandler : IRequestHandler<MoveCouriersCommand, U
                     return completeOrderResult.Error;
                 
                 courier.Value.SetFree();
-                _orderRepository.Update(order);
             }
 
+            _orderRepository.Update(order);
             _courierRepository.Update(courier.Value);
         }
 
