@@ -24,7 +24,7 @@ public class MoveCouriersCommandHandler : IRequestHandler<MoveCouriersCommand, U
 
     public async Task<UnitResult<Error>> Handle(MoveCouriersCommand request, CancellationToken cancellationToken)
     {
-        var assignedOrders = _orderRepository.GetAllAssigned().ToList();
+        var assignedOrders = _orderRepository.GetAllAssigned();
         if (assignedOrders.Count == 0)
             return Errors.NoAssignedOrders();
 

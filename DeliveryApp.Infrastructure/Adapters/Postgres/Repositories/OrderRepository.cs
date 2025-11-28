@@ -35,11 +35,11 @@ public class OrderRepository(ApplicationDbContext dbContext) : IOrderRepository
 		return order;
 	}
 
-	public IEnumerable<Order> GetAllAssigned()
+	public List<Order> GetAllAssigned()
 	{
 		var orders = _dbContext
 			.Orders
 			.Where(o => o.Status.Name == OrderStatus.Assigned.Name);
-		return orders;
+		return orders.ToList();
 	}
 }
