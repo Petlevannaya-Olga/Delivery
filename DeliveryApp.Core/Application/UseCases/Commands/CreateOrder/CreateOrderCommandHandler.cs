@@ -5,7 +5,7 @@ using DeliveryApp.Core.Ports;
 using MediatR;
 using Primitives;
 
-namespace DeliveryApp.Core.Application.Commands.CreateOrder;
+namespace DeliveryApp.Core.Application.UseCases.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, UnitResult<Error>>
 {
