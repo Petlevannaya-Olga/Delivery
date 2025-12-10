@@ -53,16 +53,8 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
         }
 
         // Сохраняем изменения в БД
-        try
-        {
-            _courierRepository.Update(dispatchResult.Value);
-            _orderRepository.Update(getOrderResult.Value);
-            await _unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync(cancellationToken);
-        }
+        _courierRepository.Update(dispatchResult.Value);
+        _orderRepository.Update(getOrderResult.Value);
 
         return UnitResult.Success<Error>();
     }
@@ -81,7 +73,7 @@ public class AssignOrderCommandHandler : IRequestHandler<AssignOrderCommand, Uni
 
         public static Error AvailableOrdersWereNotFound()
         {
-            return new Error("available.orders.were.not.found", 
+            return new Error("available.orders.were.not.found",
                 "Нет доступных заказов");
         }
     }

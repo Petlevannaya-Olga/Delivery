@@ -22,8 +22,6 @@ public class CreateOrderCommandShould
 
     private Maybe<Order> ExistingOrder => Order.Create(Guid.NewGuid(), Location.Create(1,1).Value).Value;
 
-    private Result<Location, Error> DefaultLocation => Location.Create(1, 1).Value;
-    
     [Fact]
     public async Task ReturnTrueWhenOrderExists()
     {

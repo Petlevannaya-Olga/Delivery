@@ -21,17 +21,6 @@ namespace DeliveryApp.Infrastructure.Adapters.Postgres
             return true;
         }
 
-        public async Task CommitAsync(CancellationToken cancellationToken = default)
-        {
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await _dbContext.Database.CommitTransactionAsync(cancellationToken);
-        }
-
-        public async Task RollbackAsync(CancellationToken cancellationToken = default)
-        {
-            await _dbContext.Database.CommitTransactionAsync(cancellationToken);
-        }
-
         private void Dispose(bool disposing)
         {
             if (!_disposed)
