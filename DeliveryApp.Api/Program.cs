@@ -1,6 +1,7 @@
 using System.Reflection;
 using CSharpFunctionalExtensions;
 using DeliveryApp.Api;
+using DeliveryApp.Api.Adapters.BackgroundJobs;
 using DeliveryApp.Core.Application.UseCases.Commands.AssignOrder;
 using DeliveryApp.Core.Application.UseCases.Commands.CreateOrder;
 using DeliveryApp.Core.Application.UseCases.Commands.MoveCouriers;
@@ -12,7 +13,14 @@ using DeliveryApp.Infrastructure.Adapters.Postgres;
 using DeliveryApp.Infrastructure.Adapters.Postgres.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using OpenApi.Filters;
+using OpenApi.Formatters;
+using OpenApi.OpenApi;
 using Primitives;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +39,8 @@ builder.Services.AddCors(options =>
 
 // Configuration
 builder.Services.ConfigureOptions<SettingsSetup>();
-var connectionString = builder.Configuration["CONNECTION_STRING"];
+// var connectionString = builder.Configuration["CONNECTION_STRING"];
+ var connectionString = "Server=localhost;Port=5432;User Id=postgres;Password=postgres;Database=delivery;";
 
 // Domain Services
 builder.Services.AddScoped<IDispatchService, DispatchService>();
@@ -67,6 +76,55 @@ builder.Services.AddTransient<IRequestHandler<GetAllCouriersQuery, GetAllCourier
 builder.Services.AddTransient<IRequestHandler<GetUncompletedOrdersQuery, GetUncompletedOrdersResponse>>(_ =>
     new GetUncompletedOrdersQueryHandler(connectionString));
 
+// HTTP Handlers
+builder.Services.AddControllers(options => { options.InputFormatters.Insert(0, new InputFormatterStream()); })
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+        options.SerializerSettings.Converters.Add(new StringEnumConverter
+        {
+            NamingStrategy = new CamelCaseNamingStrategy()
+        });
+    });
+
+builder.Services.AddQuartz(configure =>
+{
+    var assignOrdersJobKey = new JobKey(nameof(AssignOrdersJob));
+    var moveCouriersJobKey = new JobKey(nameof(MoveCouriersJob));
+    configure
+        .AddJob<AssignOrdersJob>(assignOrdersJobKey)
+        .AddTrigger(
+            trigger => trigger.ForJob(assignOrdersJobKey)
+                .WithSimpleSchedule(
+                    schedule => schedule.WithIntervalInSeconds(1)
+                        .RepeatForever()))
+        .AddJob<MoveCouriersJob>(moveCouriersJobKey)
+        .AddTrigger(
+            trigger => trigger.ForJob(moveCouriersJobKey)
+                .WithSimpleSchedule(
+                    schedule => schedule.WithIntervalInSeconds(2)
+                        .RepeatForever()));
+    configure.UseMicrosoftDependencyInjectionJobFactory();
+});
+builder.Services.AddQuartzHostedService();
+
+// Swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("1.0.0", new OpenApiInfo
+    {
+        Title = "Delivery Service",
+        Description = "Отвечает за диспетчеризацию доставки"
+    });
+    options.CustomSchemaIds(type => type.FriendlyId(true));
+    options.IncludeXmlComments(
+        $"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Assembly.GetEntryAssembly()?.GetName().Name}.xml");
+    options.DocumentFilter<BasePathFilter>("");
+    options.OperationFilter<GeneratePathParamsValidationFilter>();
+});
+builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+
 var app = builder.Build();
 
 // -----------------------------------
@@ -78,6 +136,20 @@ else
 
 app.UseHealthChecks("/health");
 app.UseRouting();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseSwagger(c => { c.RouteTemplate = "openapi/{documentName}/openapi.json"; })
+    .UseSwaggerUI(options =>
+    {
+        options.RoutePrefix = "openapi";
+        options.SwaggerEndpoint("/openapi/1.0.0/openapi.json", "Swagger Delivery Service");
+        options.RoutePrefix = string.Empty;
+        options.SwaggerEndpoint("/openapi-original.json", "Swagger Delivery Service");
+    });
+
+app.UseCors();
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 // Apply Migrations
 using (var scope = app.Services.CreateScope())
