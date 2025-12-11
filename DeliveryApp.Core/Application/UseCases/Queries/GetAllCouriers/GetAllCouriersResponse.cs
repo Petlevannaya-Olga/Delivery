@@ -2,15 +2,15 @@
 
 public class GetAllCouriersResponse
 {
-    public GetAllCouriersResponse(List<Courier> couriers)
+    public GetAllCouriersResponse(List<CourierDto> couriers)
     {
         Couriers.AddRange(couriers);
     }
 
-    public List<Courier> Couriers { get; set; } = new();
+    public List<CourierDto> Couriers { get; set; } = new();
 }
 
-public class Courier
+public class CourierDto
 {
     /// <summary>
     ///     Идентификатор
@@ -25,10 +25,10 @@ public class Courier
     /// <summary>
     ///     Геопозиция (X,Y)
     /// </summary>
-    public Location Location { get; set; }
+    public LocationDto LocationDto { get; set; }
 }
 
-public class Location
+public class LocationDto
 {
     /// <summary>
     ///     Горизонталь

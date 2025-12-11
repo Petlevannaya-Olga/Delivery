@@ -25,14 +25,14 @@ public class GetAllCouriersQueryHandler: IRequestHandler<GetAllCouriersQuery, Ge
         var query =
             @"SELECT id as Id,
                 name as Name,
-                status_id as StatusId,
+                status as Status,
                 transport_id as TransportId,
                 location_x as X,
                 location_y as Y
             FROM public.couriers";
         
-        var couriers = await connection.QueryAsync<Courier, Location, Courier>(query, (courier, location) => {
-                courier.Location = location;
+        var couriers = await connection.QueryAsync<CourierDto, LocationDto, CourierDto>(query, (courier, location) => {
+                courier.LocationDto = location;
                 return courier;
             },
             new { },
