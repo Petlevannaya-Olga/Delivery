@@ -114,13 +114,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("1.0.0", new OpenApiInfo
     {
         Title = "Delivery Service",
-        Description = "Отвечает за диспетчеризацию доставки",
-        Contact = new OpenApiContact
-        {
-            Name = "Kirill Vetchinkin",
-            Url = new Uri("https://microarch.ru"),
-            Email = "info@microarch.ru"
-        }
+        Description = "Отвечает за диспетчеризацию доставки"
     });
     options.CustomSchemaIds(type => type.FriendlyId(true));
     options.IncludeXmlComments(
